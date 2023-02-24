@@ -72,6 +72,10 @@
             _plateau = plateau;
         }
 
+        public Position Position { get { return _position; } }
+
+        public CardinalDirection Direction { get { return _direction; } }
+
         public void ExecuteCommand(Command command, Plateau plateau)
         {
             switch (command.Type)

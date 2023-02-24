@@ -1,1 +1,4 @@
-﻿
+﻿static void Main()
+{
+
+}
