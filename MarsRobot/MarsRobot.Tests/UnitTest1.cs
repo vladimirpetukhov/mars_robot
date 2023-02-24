@@ -1,3 +1,6 @@
+using MarsRobot.App;
+using static MarsRobot.App.Robot;
+
 namespace MarsRobot.Tests
 {
     public class Tests
@@ -8,9 +11,12 @@ namespace MarsRobot.Tests
         }
 
         [Test]
-        public void Test1()
+        public void Robot_ShouldFaceNorth_WhenInitialized()
         {
-            Assert.Pass();
+            var robot = new Robot(5, 5);
+
+            Assert.AreEqual(robot.CurrentDirection, Direction.North);
         }
     }
+}
 }
