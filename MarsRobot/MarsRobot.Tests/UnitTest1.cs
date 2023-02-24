@@ -65,6 +65,23 @@ namespace MarsRobot.Tests
         }
 
         [Test]
+        public void ExecuteCommand_WhenCommandIsMoveForward_AndRobotCannotMoveOutsidePlateau_ShouldNotMoveRobot()
+        {
+            // Arrange
+            var position = new Position(5, 5);
+            var direction = CardinalDirection.North;
+            var plateau = new Plateau(5, 5);
+            var robot = new Robot(position, direction, plateau);
+            var command = new Command { Type = CommandType.MoveForward };
+
+            // Act
+            robot.ExecuteCommand(command, plateau);
+
+            // Assert
+            Assert.AreEqual(new Position(5, 5), robot.Position);
+        }
+
+        [Test]
         public void ExecuteCommand_WhenCommandIsMoveForward_AndRobotCannotMove_ShouldNotMoveRobot()
         {
             // Arrange

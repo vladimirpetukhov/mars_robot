@@ -81,11 +81,11 @@
             switch (command.Type)
             {
                 case CommandType.MoveForward:
-                    if (_plateau.IsValidPosition(_position))
+                    if (Move())
                     {
-                        Move();
+                        break;
                     }
-                    break;
+                    return;
                 case CommandType.TurnLeft:
                     TurnLeft();
                     break;
@@ -121,7 +121,7 @@
             };
         }
 
-        public void Move()
+        public bool Move()
         {
             switch (_direction)
             {
@@ -129,29 +129,35 @@
                     if (_position.Y < _plateau.Height)
                     {
                         _position.Y++;
+                        return true;
                     }
                     break;
                 case CardinalDirection.East:
                     if (_position.X < _plateau.Width)
                     {
                         _position.X++;
+                        return true;
                     }
                     break;
                 case CardinalDirection.South:
                     if (_position.Y > 0)
                     {
                         _position.Y--;
+                        return true;
                     }
                     break;
                 case CardinalDirection.West:
                     if (_position.X > 0)
                     {
                         _position.X--;
+                        return true;
                     }
                     break;
                 default:
                     throw new ArgumentException("Invalid direction");
             }
+
+            return false;
         }
 
         public override string ToString()
