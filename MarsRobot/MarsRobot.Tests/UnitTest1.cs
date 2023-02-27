@@ -51,9 +51,10 @@ namespace MarsRobot.Tests
         public void ExecuteCommand_WhenCommandIsMoveForward_AndRobotCanMove_ShouldMoveRobot()
         {
             // Arrange
+            var plateau = new Plateau(5, 5);
             var position = new Position(2, 3);
             var direction = CardinalDirection.North;
-            var plateau = new Plateau(5, 5);
+            
             var robot = new Robot(position, direction, plateau);
             var command = new Command { Type = CommandType.MoveForward };
 
@@ -61,7 +62,7 @@ namespace MarsRobot.Tests
             robot.ExecuteCommand(command, plateau);
 
             // Assert
-            Assert.AreEqual(new Position(2, 4), robot.Position);
+            Assert.That(new Position(2,4), Is.EqualTo(robot.Position));
         }
 
         [Test]

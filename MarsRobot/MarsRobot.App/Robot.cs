@@ -1,15 +1,13 @@
-﻿namespace MarsRobot.App
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+
+namespace MarsRobot.App
 {
     public enum CommandType
     {
         MoveForward,
         TurnLeft,
         TurnRight
-    }
-
-    public interface ICommand
-    {
-
     }
 
     public class Command
@@ -19,22 +17,60 @@
 
     public class Plateau
     {
-        public int Width { get; }
-        public int Height { get; }
+
+        private int _width;
+        private int _height;
 
         public Plateau(int width, int height)
         {
-            Width = width;
-            Height = height;
+            _width = width;
+            _height = height;
+        }
+
+        public int Width
+        {
+            get { return _width; }
+            private set
+            {
+                if (!DimensionIsValid(value))
+                {
+                    throw new ArgumentException();
+                }
+                _width = value;
+            }
+        }
+
+        public int Height
+        {
+            get { return _height; }
+            private set
+            {
+                if (!DimensionIsValid(value))
+                {
+                    throw new ArgumentException();
+                }
+                _height = value;
+            }
         }
 
         public bool IsValidPosition(Position position)
         {
-            return position.X >= 0 && position.X <= Width && position.Y >= 0 && position.Y <= Height;
+            return position.X >= 0 && position.X < Width &&
+                   position.Y >= 0 && position.Y < Height;
+        }
+
+        private bool DimensionIsValid(int? value)
+        {
+            if (!value.HasValue || value <= 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 
-    public class Position
+    public class Position : IEquatable<Position>
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -49,7 +85,41 @@
         {
             return $"{X},{Y}";
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            Position other = (Position)obj;
+
+            return X == other.X && Y == other.Y;
+        }
+
+        public bool Equals(Position? other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return X == other.X && Y == other.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+                return hash;
+            }
+        }
     }
+
 
     public enum CardinalDirection
     {
@@ -61,108 +131,83 @@
 
     public class Robot
     {
-        private Position _position;
-        private CardinalDirection _direction;
+
         private Plateau _plateau;
 
         public Robot(Position position, CardinalDirection direction, Plateau plateau)
         {
-            _position = position;
-            _direction = direction;
-            _plateau = plateau;
+            Position = position;
+            Direction = direction;
+            _plateau = plateau ?? throw new ArgumentNullException(nameof(plateau));
         }
 
-        public Position Position { get { return _position; } }
+        public Position Position { get; private set; }
 
-        public CardinalDirection Direction { get { return _direction; } }
+        public CardinalDirection Direction { get; private set; }
+
+        public void TurnLeft()
+        {
+            Direction = Direction switch
+            {
+                CardinalDirection.North => CardinalDirection.West,
+                CardinalDirection.West => CardinalDirection.South,
+                CardinalDirection.South => CardinalDirection.East,
+                CardinalDirection.East => CardinalDirection.North,
+                _ => throw new InvalidOperationException("Invalid direction"),
+            };
+        }
+
+        public void TurnRight()
+        {
+            Direction = Direction switch
+            {
+                CardinalDirection.North => CardinalDirection.East,
+                CardinalDirection.East => CardinalDirection.South,
+                CardinalDirection.South => CardinalDirection.West,
+                CardinalDirection.West => CardinalDirection.North,
+                _ => throw new InvalidOperationException("Invalid direction"),
+            };
+        }
+
+        public void MoveForward()
+        {
+            var newPosition = Direction switch
+            {
+                CardinalDirection.North => new Position(Position.X, Position.Y + 1),
+                CardinalDirection.South => new Position(Position.X, Position.Y - 1),
+                CardinalDirection.East => new Position(Position.X + 1, Position.Y),
+                CardinalDirection.West => new Position(Position.X - 1, Position.Y),
+                _ => throw new InvalidOperationException("Invalid direction"),
+            };
+
+            if (_plateau != null && _plateau.IsValidPosition(newPosition))
+            {
+                Position = newPosition;
+            }
+        }
 
         public void ExecuteCommand(Command command, Plateau plateau)
         {
+            _plateau = plateau;
             switch (command.Type)
             {
-                case CommandType.MoveForward:
-                    if (Move())
-                    {
-                        break;
-                    }
-                    return;
                 case CommandType.TurnLeft:
                     TurnLeft();
                     break;
                 case CommandType.TurnRight:
                     TurnRight();
                     break;
-                default:
-                    throw new ArgumentException("Invalid command type");
-            }
-        }
-
-        public void TurnLeft()
-        {
-            _direction = _direction switch
-            {
-                CardinalDirection.North => CardinalDirection.West,
-                CardinalDirection.East => CardinalDirection.North,
-                CardinalDirection.South => CardinalDirection.East,
-                CardinalDirection.West => CardinalDirection.South,
-                _ => throw new ArgumentException("Invalid direction"),
-            };
-        }
-
-        public void TurnRight()
-        {
-            _direction = _direction switch
-            {
-                CardinalDirection.North => CardinalDirection.East,
-                CardinalDirection.East => CardinalDirection.South,
-                CardinalDirection.South => CardinalDirection.West,
-                CardinalDirection.West => CardinalDirection.North,
-                _ => throw new ArgumentException("Invalid direction"),
-            };
-        }
-
-        public bool Move()
-        {
-            switch (_direction)
-            {
-                case CardinalDirection.North:
-                    if (_position.Y < _plateau.Height)
-                    {
-                        _position.Y++;
-                        return true;
-                    }
-                    break;
-                case CardinalDirection.East:
-                    if (_position.X < _plateau.Width)
-                    {
-                        _position.X++;
-                        return true;
-                    }
-                    break;
-                case CardinalDirection.South:
-                    if (_position.Y > 0)
-                    {
-                        _position.Y--;
-                        return true;
-                    }
-                    break;
-                case CardinalDirection.West:
-                    if (_position.X > 0)
-                    {
-                        _position.X--;
-                        return true;
-                    }
+                case CommandType.MoveForward:
+                    MoveForward();
                     break;
                 default:
-                    throw new ArgumentException("Invalid direction");
+                    throw new InvalidOperationException("Invalid command type");
             }
-
-            return false;
         }
 
         public override string ToString()
         {
-            return $"{_position.ToString()} {_direction.ToString()}";
+            return $"{Position.X},{Position.Y} {Enum.GetName(Direction)}";
         }
     }
 }
