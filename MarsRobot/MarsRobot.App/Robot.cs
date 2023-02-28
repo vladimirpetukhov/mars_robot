@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-
-namespace MarsRobot.App
+﻿namespace MarsRobot.App
 {
     public enum CommandType
     {
-        MoveForward,
-        TurnLeft,
-        TurnRight
+        F,
+        L,
+        R
     }
 
     public class Command
@@ -123,10 +120,10 @@ namespace MarsRobot.App
 
     public enum CardinalDirection
     {
-        North,
-        East,
-        South,
-        West
+        N,
+        E,
+        S,
+        W
     }
 
     public class Robot
@@ -149,10 +146,10 @@ namespace MarsRobot.App
         {
             Direction = Direction switch
             {
-                CardinalDirection.North => CardinalDirection.West,
-                CardinalDirection.West => CardinalDirection.South,
-                CardinalDirection.South => CardinalDirection.East,
-                CardinalDirection.East => CardinalDirection.North,
+                CardinalDirection.N => CardinalDirection.W,
+                CardinalDirection.W => CardinalDirection.S,
+                CardinalDirection.S => CardinalDirection.E,
+                CardinalDirection.E => CardinalDirection.N,
                 _ => throw new InvalidOperationException("Invalid direction"),
             };
         }
@@ -161,10 +158,10 @@ namespace MarsRobot.App
         {
             Direction = Direction switch
             {
-                CardinalDirection.North => CardinalDirection.East,
-                CardinalDirection.East => CardinalDirection.South,
-                CardinalDirection.South => CardinalDirection.West,
-                CardinalDirection.West => CardinalDirection.North,
+                CardinalDirection.N => CardinalDirection.E,
+                CardinalDirection.E => CardinalDirection.S,
+                CardinalDirection.S => CardinalDirection.W,
+                CardinalDirection.W => CardinalDirection.N,
                 _ => throw new InvalidOperationException("Invalid direction"),
             };
         }
@@ -173,10 +170,10 @@ namespace MarsRobot.App
         {
             var newPosition = Direction switch
             {
-                CardinalDirection.North => new Position(Position.X, Position.Y + 1),
-                CardinalDirection.South => new Position(Position.X, Position.Y - 1),
-                CardinalDirection.East => new Position(Position.X + 1, Position.Y),
-                CardinalDirection.West => new Position(Position.X - 1, Position.Y),
+                CardinalDirection.N => new Position(Position.X, Position.Y + 1),
+                CardinalDirection.S => new Position(Position.X, Position.Y - 1),
+                CardinalDirection.E => new Position(Position.X + 1, Position.Y),
+                CardinalDirection.W => new Position(Position.X - 1, Position.Y),
                 _ => throw new InvalidOperationException("Invalid direction"),
             };
 
@@ -191,13 +188,13 @@ namespace MarsRobot.App
             _plateau = plateau;
             switch (command.Type)
             {
-                case CommandType.TurnLeft:
+                case CommandType.L:
                     TurnLeft();
                     break;
-                case CommandType.TurnRight:
+                case CommandType.R:
                     TurnRight();
                     break;
-                case CommandType.MoveForward:
+                case CommandType.F:
                     MoveForward();
                     break;
                 default:

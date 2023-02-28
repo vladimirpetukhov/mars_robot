@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MarsRobot.App": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
